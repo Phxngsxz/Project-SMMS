@@ -1,7 +1,17 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, query, where, getDocs, Timestamp } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { initializeApp } from "firebase/app"
+import {
+  getAuth,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth"
+import { getFirestore } from "firebase/firestore"
+import { getStorage } from "firebase/storage"
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDoc, getDocs, query, where } from "firebase/firestore"
+import { serverTimestamp } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: "AIzaSyCksT7zTVeokhHy04icS9yFiu0DYFq7qc8",
@@ -10,108 +20,140 @@ const firebaseConfig = {
   storageBucket: "servicemaintenance-management.appspot.com",
   messagingSenderId: "887805560743",
   appId: "1:887805560743:web:a983bf345d290e94f15882",
-};
+}
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-const db = getFirestore(app);
-const storage = getStorage(app);
+const app = initializeApp(firebaseConfig)
+export const auth = getAuth(app)
+export const db = getFirestore(app)
+export const storage = getStorage(app)
 
-// ฟังก์ชันช่วยเหลือ
-const addRequest = async (collectionName, data) => {
+// Google Provider
+export const provider = new GoogleAuthProvider()
+
+// Facebook Provider
+export const facebookProvider = new FacebookAuthProvider()
+facebookProvider.addScope("email")
+
+// Line Provider (ใช้ OAuthProvider)
+export const lineProvider = new OAuthProvider("oidc.line")
+lineProvider.addScope("profile")
+lineProvider.addScope("openid")
+lineProvider.addScope("email")
+
+// Firestore functions
+const addRequest = async (request) => {
   try {
-    const docRef = await addDoc(collection(db, collectionName), data);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error adding document:", error);
-    throw error;
+    const docRef = await addDoc(collection(db, "requests"), {
+      ...request,
+      createdAt: serverTimestamp(),
+    })
+    console.log("Document written with ID: ", docRef.id)
+    return docRef.id
+  } catch (e) {
+    console.error("Error adding document: ", e)
+    return null
   }
-};
+}
 
-const updateRequest = async (collectionName, id, data) => {
+const updateRequest = async (id, request) => {
   try {
-    await updateDoc(doc(db, collectionName, id), data);
-  } catch (error) {
-    console.error("Error updating document:", error);
-    throw error;
+    const requestDoc = doc(db, "requests", id)
+    await updateDoc(requestDoc, request)
+    console.log("Document updated with ID: ", id)
+    return true
+  } catch (e) {
+    console.error("Error updating document: ", e)
+    return false
   }
-};
+}
 
-const deleteRequest = async (collectionName, id) => {
+const deleteRequest = async (id) => {
   try {
-    await deleteDoc(doc(db, collectionName, id));
-  } catch (error) {
-    console.error("Error deleting document:", error);
-    throw error;
+    const requestDoc = doc(db, "requests", id)
+    await deleteDoc(requestDoc)
+    console.log("Document deleted with ID: ", id)
+    return true
+  } catch (e) {
+    console.error("Error deleting document: ", e)
+    return false
   }
-};
+}
 
-const getRequest = async (collectionName, id) => {
+const getRequest = async (id) => {
   try {
-    const docSnap = await getDoc(doc(db, collectionName, id));
+    const requestDoc = doc(db, "requests", id)
+    const docSnap = await getDoc(requestDoc)
+
     if (docSnap.exists()) {
-      return docSnap.data();
+      console.log("Document data:", docSnap.data())
+      return { id: docSnap.id, ...docSnap.data() }
     } else {
-      throw new Error("Document not found");
+      console.log("No such document!")
+      return null
     }
-  } catch (error) {
-    console.error("Error getting document:", error);
-    throw error;
+  } catch (e) {
+    console.error("Error getting document: ", e)
+    return null
   }
-};
+}
 
 const getUserRequests = async (userId) => {
   try {
-    const q = query(collection(db, "repairRequests"), where("userId", "==", userId));
-    const querySnapshot = await getDocs(q);
-    const requests = [];
+    const q = query(collection(db, "requests"), where("userId", "==", userId))
+    const querySnapshot = await getDocs(q)
+    const requests = []
     querySnapshot.forEach((doc) => {
-      requests.push({ id: doc.id, ...doc.data() });
-    });
-    return requests;
-  } catch (error) {
-    console.error("Error getting user requests:", error);
-    throw error;
+      requests.push({ id: doc.id, ...doc.data() })
+    })
+    return requests
+  } catch (e) {
+    console.error("Error getting documents: ", e)
+    return []
   }
-};
+}
 
+// Auth functions
 const signInWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, provider);
-    return result.user;
-  } catch (error) {
-    console.error("Error signing in with Google:", error);
-    throw error;
+    await signInWithPopup(auth, provider)
+  } catch (err) {
+    console.error(err)
   }
-};
+}
 
 const logOut = async () => {
   try {
-    await signOut(auth);
-  } catch (error) {
-    console.error("Error signing out:", error);
-    throw error;
+    await signOut(auth)
+  } catch (err) {
+    console.error(err)
   }
-};
+}
 
 const checkAuthState = (callback) => {
-  return onAuthStateChanged(auth, callback);
-};
+  return onAuthStateChanged(auth, callback)
+}
 
+// Helper function to format timestamp
 const formatTimestamp = (timestamp) => {
-  if (timestamp && timestamp.toDate) {
-    return timestamp.toDate().toLocaleString();
+  if (!timestamp) return ""
+  try {
+    const date = timestamp.toDate() // Convert Firebase Timestamp to JavaScript Date object
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    })
+  } catch (error) {
+    console.error("Error formatting timestamp:", error)
+    return "Invalid Date"
   }
-  return "Invalid Date";
-};
+}
 
 export {
-  auth,
-  provider,
   app,
-  db,
-  storage,
   addRequest,
   updateRequest,
   deleteRequest,
@@ -121,4 +163,6 @@ export {
   logOut,
   checkAuthState,
   formatTimestamp,
-};
+}
+
+export default app

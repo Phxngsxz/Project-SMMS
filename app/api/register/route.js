@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../../firebaseConfig';
+import { auth } from '@/firebaseConfig';
 import { doc, setDoc, getFirestore } from 'firebase/firestore';
 
 export async function POST(request) {

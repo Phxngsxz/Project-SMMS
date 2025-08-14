@@ -1,15 +1,16 @@
 "use client";
 
-import { auth } from '../firebaseConfig';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../components/Sidebar';
+import { auth } from "../firebaseConfig";
+import { useRouter } from "next/navigation";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
 export default function UserPage() {
   const router = useRouter();
 
   const handleLogout = async () => {
     await auth.signOut();
-    router.push('/login');
+    router.push("/login");
   };
 
   return (
@@ -17,16 +18,19 @@ export default function UserPage() {
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        <h1 className="text-2xl font-bold mb-4">User Dashboard</h1>
-        <p className="text-blue-500">คุณคือ User</p>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 mt-4"
-        >
-          Logout
-        </button>
+      <div className="flex-1 flex flex-col">
+        <Navbar />
+        {/* Main Content */}
+        <div className="flex-1 p-8">
+          <h1 className="text-2xl font-bold mb-4">User Dashboard</h1>
+          <p className="text-blue-500">คุณคือ User</p>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 mt-4"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   );

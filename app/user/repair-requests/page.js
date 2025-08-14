@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { app, auth } from "../../firebaseConfig";
 import Sidebar from '../../components/Sidebar';
+import Navbar from "../../components/Navbar";
 import Swal from "sweetalert2";
 
 export default function UserRepairRequests() {
@@ -318,6 +319,9 @@ export default function UserRepairRequests() {
       {/* Sidebar */}
       <Sidebar />
 
+      <div className="flex-1 flex flex-col">
+              <Navbar />
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="p-4 flex-1 flex flex-col">
@@ -453,6 +457,7 @@ export default function UserRepairRequests() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
