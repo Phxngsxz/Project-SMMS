@@ -118,11 +118,11 @@ export default function AdminRepairRequests() {
           });
         } catch (error) {
           console.error("Error deleting request:", error);
-          Swal.fire({
-            icon: "error",
-            title: "เกิดข้อผิดพลาด",
-            text: "ไม่สามารถลบคำขอซ่อมได้",
-          });
+          // Swal.fire({
+          //   icon: "error",
+          //   title: "เกิดข้อผิดพลาด",
+          //   text: "ไม่สามารถลบคำขอซ่อมได้",
+          // });
         }
       }
     });

@@ -41,7 +41,7 @@ export default function AdminRepairRequests() {
         console.error("Error fetching repair requests:", error);
         Swal.fire({
           icon: "error",
-          title: "เกิดข้อผิดพลาด",
+          title: "เกิดข้อผิดพลาด", 
           text: "ไม่สามารถดึงข้อมูลคำขอซ่อมได้",
         });
       } finally {
