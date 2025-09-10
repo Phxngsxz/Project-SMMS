@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { collection, getDocs, updateDoc, doc, deleteDoc, getFirestore } from "firebase/firestore";
-import { app } from "../../firebaseConfig";
-import Sidebar from '../../components/Sidebar';
-import Navbar from '../../components/Navbar';
+import { app } from '../firebaseConfig';
+import Sidebar from '../components/Sidebar';
+import Navbar from '../components/Navbar';
 import Swal from "sweetalert2";
 
 export default function AdminRepairRequests() {
